@@ -1,0 +1,269 @@
+# web-intro-edit4
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minh họa Cấu trúc Cây DOM (Document Object Model)</title>
+  <style>
+    /* Reset cấu trúc giao diện cơ bản */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #2d3748;
+      background-color: #f7fafc;
+      padding: 30px 15px;
+    }
+
+    /* Khung chứa chính */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 35px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    /* --- CẤU TRÚC LỒNG NHAU THEO YÊU CẦU: HEADER - MAIN - SECTION - FOOTER --- */
+    /* 1. Header */
+    header.page-header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    header.page-header h1 {
+      color: #1a365d;
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+    header.page-header p {
+      color: #718096;
+    }
+
+    /* 2. Main */
+    main.content-area {
+      margin-bottom: 30px;
+    }
+
+    /* 3. Section */
+    section.dom-explanation {
+      background-color: #ebf8ff;
+      border-left: 5px solid #3182ce;
+      padding: 15px 20px;
+      border-radius: 4px;
+      margin-bottom: 35px;
+    }
+    section.dom-explanation h2 {
+      color: #2b6cb0;
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+    }
+
+    /* 4. Footer */
+    footer.page-footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 15px;
+      border-top: 1px solid #e2e8f0;
+      color: #a0aec0;
+      font-size: 0.85rem;
+    }
+
+    /* --- GIAO DIỆN SƠ ĐỒ CÂY DOM BẰNG CSS --- */
+    .dom-tree-box {
+      background: #1e1e24;
+      color: #f8f8f2;
+      padding: 25px;
+      border-radius: 8px;
+      font-family: 'Courier New', Courier, monospace;
+      margin-bottom: 35px;
+      overflow-x: auto;
+    }
+    .dom-tree-box h3 {
+      color: #66d9ef;
+      margin-bottom: 15px;
+      font-family: sans-serif;
+    }
+
+    /* Định dạng phân cấp thư mục hình cây */
+    .tree-branch {
+      list-style: none;
+      padding-left: 25px;
+      position: relative;
+    }
+    .tree-branch li {
+      margin: 8px 0;
+      padding-left: 15px;
+      position: relative;
+    }
+    /* Đường kẻ dọc nối các nhánh */
+    .tree-branch li::before {
+      content: "";
+      position: absolute;
+      left: -10px;
+      top: -5px;
+      bottom: 50%;
+      width: 1px;
+      border-left: 2px dashed #44475a;
+    }
+    /* Đường kẻ ngang vào chữ */
+    .tree-branch li::after {
+      content: "";
+      position: absolute;
+      left: -10px;
+      top: 50%;
+      width: 15px;
+      border-top: 2px dashed #44475a;
+    }
+
+    /* Màu sắc định danh các node phần tử */
+    .node-root { color: #ff79c6; font-weight: bold; }
+    .node-parent { color: #50fa7b; font-weight: bold; }
+    .node-child { color: #ffb86c; }
+
+    /* Hiệu ứng tương tác JS */
+    .interactive-panel {
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .highlight-btn {
+      background-color: #48bb78;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .highlight-btn:hover {
+      background-color: #38a169;
+    }
+    
+    /* Class sẽ được thêm vào bằng JS để làm sáng phần tử */
+    .active-node {
+      background-color: #feebc8 !important;
+      color: #c05621 !important;
+      border: 2px solid #dd6b20 !important;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <header id="targetHeader" class="page-header">
+      <h1>Mô Tả Sinh Động Về Cấu Trúc DOM</h1>
+      <p>Học cách trình duyệt tổ chức phần tử HTML theo mô hình quan hệ Cha - Con</p>
+    </header>
+
+    <main id="targetMain" class="content-area">
+      
+      <section id="targetSection" class="dom-explanation">
+        <h2>DOM là gì?</h2>
+        <p>DOM (Document Object Model) biểu diễn toàn bộ tài liệu HTML dưới dạng một <strong>cây đối tượng</strong>. Trong hệ thống cây này, mỗi thẻ HTML được coi là một "Nút" (Node). Thẻ bao bọc bên ngoài đóng vai trò là <strong>Cha (Parent)</strong>, các thẻ nằm lồng bên trong đóng vai trò là <strong>Con (Child)</strong>.</p>
+      </section>
+
+      <div class="dom-tree-box">
+        <h3>Mô phỏng Cây DOM của trang web này:</h3>
+        <ul class="tree-branch">
+          <li>
+            <span class="node-root">document</span> (Gốc)
+            <ul class="tree-branch">
+              <li>
+                <span class="node-root">&lt;html&gt;</span>
+                <ul class="tree-branch">
+                  <li><span class="node-child">&lt;head&gt;</span> (Chứa meta, title, style)</li>
+                  <li>
+                    <span class="node-parent">&lt;body&gt;</span>
+                    <ul class="tree-branch">
+                      <li>
+                        <span id="nodeHeader" class="node-parent">&lt;header&gt;</span> (Thẻ Cha)
+                        <ul class="tree-branch">
+                          <li><span class="node-child">&lt;h1&gt;</span> (Thẻ Con)</li>
+                          <li><span class="node-child">&lt;p&gt;</span> (Thẻ Con)</li>
+                        </ul>
+                      </li>
+                      <li>
+                        <span id="nodeMain" class="node-parent">&lt;main&gt;</span> (Thẻ Cha)
+                        <ul class="tree-branch">
+                          <li>
+                            <span id="nodeSection" class="node-parent">&lt;section&gt;</span> (Thẻ Con của main, Thẻ Cha của h2/p)
+                            <ul class="tree-branch">
+                              <li><span class="node-child">&lt;h2&gt;</span> (Thẻ Con)</li>
+                              <li><span class="node-child">&lt;p&gt;</span> (Thẻ Con)</li>
+                            </ul>
+                          </li>
+                        </ul>
+                      </li>
+                      <li>
+                        <span id="nodeFooter" class="node-parent">&lt;footer&gt;</span> (Thẻ Cha)
+                        <ul class="tree-branch">
+                          <li><span class="node-child">&lt;p&gt;</span> (Thẻ Con)</li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="interactive-panel">
+        <p style="margin-bottom: 12px;">Thử nghiệm tương tác với cấu trúc cây DOM thật:</p>
+        <button class="highlight-btn" onclick="toggleDOMHighlight()">Kích hoạt Highlight phần tử DOM</button>
+      </div>
+
+    </main>
+
+    <footer id="targetFooter" class="page-footer">
+      <p>&copy; 2026 - Bài thực hành mô phỏng mô hình đối tượng tài liệu</p>
+    </footer>
+
+  </div>
+
+  <script>
+    function toggleDOMHighlight() {
+      // 1. Tìm các phần tử giao diện thực tế (Thật) trên trang
+      const realHeader = document.getElementById('targetHeader');
+      const realMain = document.getElementById('targetMain');
+      const realSection = document.getElementById('targetSection');
+      const realFooter = document.getElementById('targetFooter');
+
+      // 2. Tìm các nhãn chữ đại diện tương ứng trên sơ đồ cây giả lập
+      const nodeHeader = document.getElementById('nodeHeader');
+      const nodeMain = document.getElementById('nodeMain');
+      const nodeSection = document.getElementById('nodeSection');
+      const nodeFooter = document.getElementById('nodeFooter');
+
+      // 3. Tiến hành Bật/Tắt (Toggle) class "active-node" để làm nổi bật
+      realHeader.classList.toggle('active-node');
+      realMain.classList.toggle('active-node');
+      realSection.classList.toggle('active-node');
+      realFooter.classList.toggle('active-node');
+
+      nodeHeader.classList.toggle('active-node');
+      nodeMain.classList.toggle('active-node');
+      nodeSection.classList.toggle('active-node');
+      nodeFooter.classList.toggle('active-node');
+    }
+  </script>
+
+</body>
+</html>
